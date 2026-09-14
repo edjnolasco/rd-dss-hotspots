@@ -54,7 +54,7 @@ pip install -r requirements.txt</code></pre>
     <p><strong>Comprobación:</strong> <code>python -c "import streamlit, sklearn, pandas; print('Entorno correcto')"</code>.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">5. Paso 03 · Ejecutar primero las pruebas</h3>
-    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>pytest -q</code></pre>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>python -m pytest -q</code></pre>
     <p>Las pruebas deben fallar porque el proyecto inicial contiene funciones pendientes. Este resultado confirma que las pruebas fueron descubiertas. No elimine pruebas para obtener una ejecución verde.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">6. Paso 04 · Cargar y validar los datos</h3>
@@ -67,7 +67,7 @@ if missing:
 out["year"] = pd.to_numeric(out["year"], errors="coerce")
 out["fallecidos"] = pd.to_numeric(out["fallecidos"], errors="coerce")
 out = out.dropna(subset=["provincia", "year", "fallecidos"])</code></pre>
-    <p><strong>Comprobación:</strong> ejecute <code>pytest -q -k normalize</code>.</p>
+    <p><strong>Comprobación:</strong> ejecute <code>python -m pytest -q -k normalize</code>.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">7. Paso 05 · Crear características temporales</h3>
     <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>group = out.groupby("provincia", group_keys=False)["fallecidos"]
@@ -80,14 +80,14 @@ out["rolling_mean_3"] = (
 )
 out["target_next"] = group.shift(-1)</code></pre>
     <p><strong>Discusión:</strong> <code>target_next</code> representa el valor que se intentará predecir. Las filas del último período no poseen ese valor y no deben usarse como ejemplos etiquetados.</p>
-    <p><strong>Comprobación:</strong> <code>pytest -q -k features</code>.</p>
+    <p><strong>Comprobación:</strong> <code>python -m pytest -q -k features</code>.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">8. Paso 06 · Separar el tiempo correctamente</h3>
     <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>test_year = int(sorted(trainable["year"].unique())[-1])
 train = trainable[trainable["year"] &lt; test_year].copy()
 test = trainable[trainable["year"] == test_year].copy()</code></pre>
     <p>No utilice una partición aleatoria para este caso. El modelo debe entrenarse con el pasado y evaluarse con un período posterior.</p>
-    <p><strong>Comprobación:</strong> <code>pytest -q -k temporal</code>.</p>
+    <p><strong>Comprobación:</strong> <code>python -m pytest -q -k temporal</code>.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">9. Paso 07 · Crear baseline y modelo candidato</h3>
     <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>baseline = DummyRegressor(strategy="mean")
@@ -117,7 +117,7 @@ if score &gt;= 0.60 and delta_abs &gt; 0:
         "Monitorear la evolución y preparar medidas preventivas.",
     )</code></pre>
     <p>Cada salida debe conservar tres elementos: categoría, regla aplicada y recomendación. Una etiqueta sin explicación no cumple la función de trazabilidad.</p>
-    <p><strong>Comprobación:</strong> <code>pytest -q -k rule</code>.</p>
+    <p><strong>Comprobación:</strong> <code>python -m pytest -q -k rule</code>.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">11. Paso 09 · Calcular score y ranking</h3>
     <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>latest["prediccion"] = np.maximum(model.predict(latest[FEATURES]), 0.0)
@@ -129,7 +129,7 @@ latest["score_riesgo"] = (
 )
 ranking = latest.sort_values("score_riesgo", ascending=False)</code></pre>
     <p>El score expresa prioridad relativa dentro del conjunto analizado. No debe interpretarse automáticamente como una probabilidad.</p>
-    <p><strong>Comprobación:</strong> <code>pytest -q -k ranking</code>.</p>
+    <p><strong>Comprobación:</strong> <code>python -m pytest -q -k ranking</code>.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">12. Paso 10 · Integrar el pipeline</h3>
     <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>data = load_data(source)
@@ -143,7 +143,7 @@ return {
     "test_year": test_year,
     "latest_year": int(features["year"].max()),
 }</code></pre>
-    <p><strong>Punto de control:</strong> <code>pytest -q</code> debe mostrar seis pruebas aprobadas antes de construir la interfaz.</p>
+    <p><strong>Punto de control:</strong> <code>python -m pytest -q</code> debe mostrar seis pruebas aprobadas antes de construir la interfaz.</p>
 
     <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">13. Paso 11 · Construir la aplicación Streamlit</h3>
     <p>Abra <code>app.py</code> e incorpore, en este orden:</p>
