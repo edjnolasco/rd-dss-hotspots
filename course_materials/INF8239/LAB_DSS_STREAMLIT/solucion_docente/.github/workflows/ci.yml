@@ -1,0 +1,20 @@
+name: CI - Laboratorio DSS Streamlit
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r course_materials/INF8239/LAB_DSS_STREAMLIT/solucion_docente/requirements.txt
+      - run: python -m compileall course_materials/INF8239/LAB_DSS_STREAMLIT/solucion_docente
+      - name: Ejecutar pruebas
+        working-directory: course_materials/INF8239/LAB_DSS_STREAMLIT/solucion_docente
+        run: pytest -q
