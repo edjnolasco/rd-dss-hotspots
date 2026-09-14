@@ -1,0 +1,213 @@
+<div style="max-width:1100px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;color:#172033;line-height:1.62;">
+  <div style="background:#12395b;color:#ffffff;padding:28px 32px;border-radius:14px 14px 0 0;">
+    <p style="margin:0 0 5px 0;"><strong>Asignatura:</strong> INF-8239 Ciencia de Datos II</p>
+    <p style="margin:0 0 5px 0;"><strong>Recurso:</strong> Laboratorio especial · DSS y Streamlit</p>
+    <p style="margin:0 0 5px 0;"><strong>Autor:</strong> Edwin Ramón José Nolasco</p>
+    <p style="margin:0;"><strong>Código:</strong> INF8239.LAB.DSS.ST</p>
+    <h2 style="margin:22px 0 5px 0;font-size:30px;color:#ffffff;">DSS para priorización territorial con Streamlit</h2>
+    <p style="margin:0;">Guía del estudiante · Construcción paso a paso</p>
+  </div>
+
+  <div style="border:1px solid #cfd8e3;border-top:0;padding:30px 34px;border-radius:0 0 14px 14px;background:#ffffff;">
+    <div style="background:#eaf7f6;border-left:5px solid #168b88;padding:15px 18px;margin-bottom:20px;">
+      <strong>Propósito.</strong> Construir una aplicación que transforme datos históricos en un ranking de prioridad, explique la regla aplicada y presente recomendaciones para revisión humana.
+    </div>
+    <div style="background:#fff7e8;border-left:5px solid #e5a11a;padding:15px 18px;margin-bottom:26px;">
+      <strong>Importante.</strong> Este laboratorio es formativo y no agrega puntuación al programa. Los resultados no constituyen órdenes de intervención: apoyan a una persona responsable de decidir.
+    </div>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">1. Resultados de aprendizaje</h3>
+    <ul>
+      <li>Diferenciar una predicción, un tablero y un DSS.</li>
+      <li>Aplicar separación temporal sin utilizar información futura.</li>
+      <li>Comparar un baseline con un modelo candidato.</li>
+      <li>Convertir una predicción en score, categoría, regla y recomendación.</li>
+      <li>Construir una interfaz Streamlit y verificar el núcleo con pruebas.</li>
+    </ul>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">2. Arquitectura que construiremos</h3>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 20px 0;">
+      <tr style="background:#12395b;color:#ffffff;"><th style="padding:10px;border:1px solid #9fb0c2;">Componente</th><th style="padding:10px;border:1px solid #9fb0c2;">Responsabilidad</th></tr>
+      <tr><td style="padding:10px;border:1px solid #cfd8e3;">Datos</td><td style="padding:10px;border:1px solid #cfd8e3;">Cargar y validar provincia, año y fallecidos.</td></tr>
+      <tr style="background:#f5f8fb;"><td style="padding:10px;border:1px solid #cfd8e3;">Modelo</td><td style="padding:10px;border:1px solid #cfd8e3;">Estimar el valor del período siguiente.</td></tr>
+      <tr><td style="padding:10px;border:1px solid #cfd8e3;">Reglas DSS</td><td style="padding:10px;border:1px solid #cfd8e3;">Asignar prioridad, conservar la trazabilidad y recomendar una acción.</td></tr>
+      <tr style="background:#f5f8fb;"><td style="padding:10px;border:1px solid #cfd8e3;">Streamlit</td><td style="padding:10px;border:1px solid #cfd8e3;">Permitir configurar, ejecutar, consultar y descargar resultados.</td></tr>
+    </table>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">3. Paso 01 · Obtener el proyecto inicial</h3>
+    <p>Descargue o clone la rama académica y entre en <code>proyecto_estudiante</code>.</p>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>git clone --branch course/inf8239-materiales \
+  https://github.com/edjnolasco/rd-dss-hotspots.git
+
+cd rd-dss-hotspots/course_materials/INF8239/LAB_DSS_STREAMLIT/proyecto_estudiante</code></pre>
+    <p><strong>Comprobación:</strong> deben existir <code>app.py</code>, <code>requirements.txt</code>, <code>src/</code> y <code>tests/</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">4. Paso 02 · Crear el entorno</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>python --version
+python -m venv .venv</code></pre>
+    <p>Active el entorno en Windows PowerShell:</p>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>.\.venv\Scripts\Activate.ps1</code></pre>
+    <p>En macOS o Linux:</p>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>source .venv/bin/activate</code></pre>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>python -m pip install --upgrade pip
+pip install -r requirements.txt</code></pre>
+    <p><strong>Comprobación:</strong> <code>python -c "import streamlit, sklearn, pandas; print('Entorno correcto')"</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">5. Paso 03 · Ejecutar primero las pruebas</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>pytest -q</code></pre>
+    <p>Las pruebas deben fallar porque el proyecto inicial contiene funciones pendientes. Este resultado confirma que las pruebas fueron descubiertas. No elimine pruebas para obtener una ejecución verde.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">6. Paso 04 · Cargar y validar los datos</h3>
+    <p>Abra <code>src/dss.py</code>. Implemente la carga desde la URL incluida o desde un archivo suministrado. La validación debe rechazar columnas faltantes, valores negativos, datasets vacíos y menos de tres períodos.</p>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>required = {"provincia", "year", "fallecidos"}
+missing = required - set(df.columns)
+if missing:
+    raise ValueError(f"Faltan columnas requeridas: {sorted(missing)}")
+
+out["year"] = pd.to_numeric(out["year"], errors="coerce")
+out["fallecidos"] = pd.to_numeric(out["fallecidos"], errors="coerce")
+out = out.dropna(subset=["provincia", "year", "fallecidos"])</code></pre>
+    <p><strong>Comprobación:</strong> ejecute <code>pytest -q -k normalize</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">7. Paso 05 · Crear características temporales</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>group = out.groupby("provincia", group_keys=False)["fallecidos"]
+out["fallecidos_prev_1"] = group.shift(1)
+out["fallecidos_prev_2"] = group.shift(2)
+out["delta_abs"] = out["fallecidos"] - out["fallecidos_prev_1"]
+out["rolling_mean_3"] = (
+    group.rolling(3, min_periods=1).mean()
+    .reset_index(level=0, drop=True)
+)
+out["target_next"] = group.shift(-1)</code></pre>
+    <p><strong>Discusión:</strong> <code>target_next</code> representa el valor que se intentará predecir. Las filas del último período no poseen ese valor y no deben usarse como ejemplos etiquetados.</p>
+    <p><strong>Comprobación:</strong> <code>pytest -q -k features</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">8. Paso 06 · Separar el tiempo correctamente</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>test_year = int(sorted(trainable["year"].unique())[-1])
+train = trainable[trainable["year"] &lt; test_year].copy()
+test = trainable[trainable["year"] == test_year].copy()</code></pre>
+    <p>No utilice una partición aleatoria para este caso. El modelo debe entrenarse con el pasado y evaluarse con un período posterior.</p>
+    <p><strong>Comprobación:</strong> <code>pytest -q -k temporal</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">9. Paso 07 · Crear baseline y modelo candidato</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>baseline = DummyRegressor(strategy="mean")
+candidate = RandomForestRegressor(
+    n_estimators=200,
+    min_samples_leaf=2,
+    random_state=42,
+    n_jobs=-1,
+)
+
+baseline.fit(train[FEATURES], train["target_next"])
+candidate.fit(train[FEATURES], train["target_next"])</code></pre>
+    <p>Calcule MAE, RMSE y R² para ambos. El modelo candidato no se considera útil solo por ser más complejo: debe compararse con el baseline.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">10. Paso 08 · Construir el motor de reglas</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>if score &gt;= 0.80:
+    return Decision(
+        "Alta prioridad",
+        "R1: score &gt;= 0.80",
+        "Priorizar revisión e intervención; validar recursos disponibles.",
+    )
+
+if score &gt;= 0.60 and delta_abs &gt; 0:
+    return Decision(
+        "Vigilancia preventiva",
+        "R2: score &gt;= 0.60 y tendencia creciente",
+        "Monitorear la evolución y preparar medidas preventivas.",
+    )</code></pre>
+    <p>Cada salida debe conservar tres elementos: categoría, regla aplicada y recomendación. Una etiqueta sin explicación no cumple la función de trazabilidad.</p>
+    <p><strong>Comprobación:</strong> <code>pytest -q -k rule</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">11. Paso 09 · Calcular score y ranking</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>latest["prediccion"] = np.maximum(model.predict(latest[FEATURES]), 0.0)
+low = latest["prediccion"].min()
+high = latest["prediccion"].max()
+latest["score_riesgo"] = (
+    0.5 if high == low
+    else (latest["prediccion"] - low) / (high - low)
+)
+ranking = latest.sort_values("score_riesgo", ascending=False)</code></pre>
+    <p>El score expresa prioridad relativa dentro del conjunto analizado. No debe interpretarse automáticamente como una probabilidad.</p>
+    <p><strong>Comprobación:</strong> <code>pytest -q -k ranking</code>.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">12. Paso 10 · Integrar el pipeline</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>data = load_data(source)
+features = create_features(data)
+model, metrics, test_year = train_and_compare(features)
+ranking = build_ranking(model, features)
+
+return {
+    "metrics": metrics,
+    "ranking": ranking,
+    "test_year": test_year,
+    "latest_year": int(features["year"].max()),
+}</code></pre>
+    <p><strong>Punto de control:</strong> <code>pytest -q</code> debe mostrar seis pruebas aprobadas antes de construir la interfaz.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">13. Paso 11 · Construir la aplicación Streamlit</h3>
+    <p>Abra <code>app.py</code> e incorpore, en este orden:</p>
+    <ol>
+      <li><code>st.set_page_config</code>, título y propósito.</li>
+      <li>Carga opcional de CSV y selector Top-K.</li>
+      <li>Botón para ejecutar.</li>
+      <li>Manejo de excepciones.</li>
+      <li>Comparación de métricas.</li>
+      <li>Tabla y gráfico del ranking.</li>
+      <li>Consulta de regla y recomendación por provincia.</li>
+      <li>Advertencia de supervisión humana.</li>
+      <li>Descarga del resultado.</li>
+    </ol>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>@st.cache_data(show_spinner=False)
+def execute_pipeline(file_bytes):
+    return run_pipeline(file_bytes)
+
+uploaded = st.file_uploader("Dataset opcional", type=["csv"])
+top_k = st.slider("Cantidad de provincias", 3, 15, 10)
+
+if st.button("Ejecutar análisis", type="primary"):
+    result = execute_pipeline(uploaded.getvalue() if uploaded else None)
+    st.dataframe(result["ranking"].head(top_k), hide_index=True)</code></pre>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">14. Paso 12 · Ejecutar y verificar</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>streamlit run app.py</code></pre>
+    <p>Verifique cuatro escenarios:</p>
+    <ol>
+      <li>Ejecución con el dataset remoto.</li>
+      <li>Carga de un CSV válido.</li>
+      <li>Rechazo de un CSV sin columnas obligatorias.</li>
+      <li>Cambio del Top-K y descarga del ranking.</li>
+    </ol>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">15. Paso 13 · Registrar el trabajo en Git</h3>
+    <pre style="background:#101820;color:#f1f5f9;padding:15px;border-radius:8px;overflow:auto;"><code>git status
+git add .
+git commit -m "Implement DSS pipeline and Streamlit interface"
+git push</code></pre>
+    <p>No agregue <code>.venv</code>, cachés, secretos ni archivos temporales. En equipos, cada funcionalidad debe vincularse con un issue y llegar mediante pull request.</p>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">16. Evidencias que debe conservar</h3>
+    <ul>
+      <li>Captura de las seis pruebas aprobadas.</li>
+      <li>Captura o enlace de la aplicación funcionando.</li>
+      <li>Tabla de métricas de ambos modelos.</li>
+      <li>Ranking y trazabilidad de una provincia.</li>
+      <li>Historial de commits.</li>
+      <li>Una reflexión breve sobre las limitaciones del DSS.</li>
+    </ul>
+
+    <h3 style="color:#12395b;border-bottom:2px solid #dbe4ed;padding-bottom:8px;">17. Rúbrica formativa</h3>
+    <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+      <tr style="background:#12395b;color:#ffffff;"><th style="padding:9px;border:1px solid #9fb0c2;">Criterio</th><th style="padding:9px;border:1px solid #9fb0c2;">Logrado</th><th style="padding:9px;border:1px solid #9fb0c2;">Requiere revisión</th></tr>
+      <tr><td style="padding:9px;border:1px solid #cfd8e3;">Datos</td><td style="padding:9px;border:1px solid #cfd8e3;">Valida esquema, tipos, períodos y valores.</td><td style="padding:9px;border:1px solid #cfd8e3;">Carga sin validación suficiente.</td></tr>
+      <tr style="background:#f5f8fb;"><td style="padding:9px;border:1px solid #cfd8e3;">Modelado</td><td style="padding:9px;border:1px solid #cfd8e3;">Compara baseline y candidato con corte temporal.</td><td style="padding:9px;border:1px solid #cfd8e3;">Solo entrena un modelo o utiliza partición inadecuada.</td></tr>
+      <tr><td style="padding:9px;border:1px solid #cfd8e3;">DSS</td><td style="padding:9px;border:1px solid #cfd8e3;">Presenta score, reglas, trazabilidad y recomendación.</td><td style="padding:9px;border:1px solid #cfd8e3;">Muestra predicciones sin apoyo explícito a la decisión.</td></tr>
+      <tr style="background:#f5f8fb;"><td style="padding:9px;border:1px solid #cfd8e3;">Aplicación</td><td style="padding:9px;border:1px solid #cfd8e3;">Streamlit ejecuta, filtra, explica y descarga.</td><td style="padding:9px;border:1px solid #cfd8e3;">La interfaz no completa el flujo.</td></tr>
+      <tr><td style="padding:9px;border:1px solid #cfd8e3;">Calidad</td><td style="padding:9px;border:1px solid #cfd8e3;">Seis pruebas aprobadas, Git limpio y documentación suficiente.</td><td style="padding:9px;border:1px solid #cfd8e3;">Pruebas fallidas o evidencia incompleta.</td></tr>
+    </table>
+
+    <div style="margin-top:25px;background:#eef3f8;border:1px solid #cfd8e3;padding:16px 18px;border-radius:8px;">
+      <strong>Cierre.</strong> El modelo estima; las reglas interpretan; el ranking prioriza; la persona responsable decide. Esa separación debe poder explicarse durante la demostración.
+    </div>
+  </div>
+</div>
