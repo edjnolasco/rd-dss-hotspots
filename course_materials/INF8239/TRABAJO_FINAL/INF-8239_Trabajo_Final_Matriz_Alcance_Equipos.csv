@@ -1,0 +1,6 @@
+rango_integrantes,modalidades,modelos,pruebas,producto_obligatorio,requisitos_adicionales
+1,"A o B","Baseline + 1 candidato",6,"Notebook reproducible y demostración","Repositorio y documentación"
+2-3,"A o B","Baseline + 2 modelos",8,"Demostración integrada","Control de versiones y evidencia individual"
+4-5,"A o B","Baseline + 2 modelos",8,"Documentación y demostración","Mayor profundidad y componentes distribuibles"
+6-7,"A o B","3 modelos",12,"Aplicación, API o tablero funcional","Análisis comparativo e integración"
+8-9,"B: DSS obligatoria","Según problema y justificación",16,"DSS funcional + API o pipeline","CI; Model Card; auditoría; monitoreo"
